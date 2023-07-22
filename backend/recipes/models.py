@@ -1,10 +1,8 @@
-from django.db import models
 from django.core.validators import MinValueValidator
+from django.db import models
 
 from users.models import User
 
-
-    
 
 class Tag(models.Model):
     name = models.CharField(
@@ -22,9 +20,11 @@ class Tag(models.Model):
         max_length=16,
         unique=True,
     )
+
     class Meta:
         ordering = ['name']
-    
+
+
 class Ingredient(models.Model):
     name = models.CharField(
         'Name',
@@ -35,6 +35,7 @@ class Ingredient(models.Model):
         'Unit',
         max_length=20,
     )
+
     class Meta:
         ordering = ['name']
 
@@ -43,14 +44,13 @@ class RecipeIngredient(models.Model):
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
+        related_name='recipeIngredient'
     )
     amount = models.PositiveSmallIntegerField(
         validators=[
             MinValueValidator(1)
         ],
     )
-    
-
 
 
 class Recipe(models.Model):
@@ -71,10 +71,11 @@ class Recipe(models.Model):
     text = models.TextField()
     tags = models.ManyToManyField(
         Tag,
-    )    
-    ingredients = models.ManyToManyField(RecipeIngredient,
-                                        through='RecipeIngredientRecipe',
-                                         )
+    )
+    ingredients = models.ManyToManyField(
+        RecipeIngredient,
+        through='RecipeIngredientRecipe'
+        )
     cooking_time = models.PositiveSmallIntegerField(
         validators=[
             MinValueValidator(1)
@@ -82,18 +83,23 @@ class Recipe(models.Model):
     )
     created = models.DateTimeField(auto_now_add=True,
                                    verbose_name='Created')
+
     class Meta:
         ordering = ['-created']
+
 
 class RecipeIngredientRecipe(models.Model):
     recipe_ingredient = models.ForeignKey(
         RecipeIngredient,
         on_delete=models.CASCADE,
+        related_name='recipeIngredientRecipe'
     )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
+        related_name='ingredient'
     )
+
     class Meta:
         ordering = ['-id']
         constraints = [
@@ -113,11 +119,13 @@ class Favorite(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='favorites',
+        related_name='infavorite',
     )
+    created = models.DateTimeField(auto_now_add=True,
+                                   verbose_name='Created')
 
     class Meta:
-        ordering = ['-id']
+        ordering = ['-created']
         constraints = [
             models.UniqueConstraint(
                 fields=['user', 'recipe'],
@@ -137,9 +145,11 @@ class ShoppingCart(models.Model):
         on_delete=models.CASCADE,
         related_name='carts'
     )
+    created = models.DateTimeField(auto_now_add=True,
+                                   verbose_name='Created')
 
     class Meta:
-        ordering = ['-id']
+        ordering = ['-created']
         constraints = [
             models.UniqueConstraint(
                 fields=['user', 'recipe'],
