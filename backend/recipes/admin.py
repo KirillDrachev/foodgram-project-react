@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from .models import (Ingredient, Tag, Recipe,
-                     Favorite, ShoppingCart, RecipeIngredient, RecipeIngredients)
+                     Favorite, ShoppingCart, RecipeIngredient, RecipeIngredientRecipe)
 
 
 @admin.register(Ingredient)
@@ -13,7 +13,7 @@ class IngredientAdmin(admin.ModelAdmin):
 class RecipeIngredienttAdmin(admin.ModelAdmin):
     exclude = ('pk',)
 
-@admin.register(RecipeIngredients)
+@admin.register(RecipeIngredientRecipe)
 class RecipeIngredienttAdmin(admin.ModelAdmin):
     exclude = ('pk',)
 

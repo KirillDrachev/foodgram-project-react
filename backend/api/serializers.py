@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 from recipes.models import (Ingredient, Tag, Favorite,
-                            Recipe, RecipeIngredient, RecipeIngredients, ShoppingCart)
+                            Recipe, RecipeIngredient, RecipeIngredientRecipe, ShoppingCart)
 from users.models import User, Subscribe
 
 class UserSerializer(UserCreateSerializer):
@@ -116,8 +116,8 @@ class RecipeSerializer(serializers.ModelSerializer):
             current_recipe_ingredient = RecipeIngredient.objects.create(
                 ingredient=current_ingredient, amount=amount
             )
-            RecipeIngredients.objects.create(
-                recipe_ngredient=current_recipe_ingredient, recipe=recipe
+            RecipeIngredientRecipe.objects.create(
+                recipe_ingredient=current_recipe_ingredient, recipe=recipe
             )
         return recipe
     
@@ -136,8 +136,8 @@ class RecipeSerializer(serializers.ModelSerializer):
             current_recipe_ingredient = RecipeIngredient.objects.create(
                 ingredient=current_ingredient, amount=amount
             )
-            RecipeIngredients.objects.create(
-                recipe_ngredient=current_recipe_ingredient, recipe=instance
+            RecipeIngredientRecipe.objects.create(
+                recipe_ingredient=current_recipe_ingredient, recipe=instance
             )
         instance.save()
         return instance

@@ -73,8 +73,7 @@ class Recipe(models.Model):
         Tag,
     )    
     ingredients = models.ManyToManyField(RecipeIngredient,
-                                        through='RecipeIngredients',
-                                        # related_name='recipeingredients',
+                                        through='RecipeIngredientRecipe',
                                          )
     cooking_time = models.PositiveSmallIntegerField(
         validators=[
@@ -86,8 +85,8 @@ class Recipe(models.Model):
     class Meta:
         ordering = ['-created']
 
-class RecipeIngredients(models.Model):
-    recipe_ngredient = models.ForeignKey(
+class RecipeIngredientRecipe(models.Model):
+    recipe_ingredient = models.ForeignKey(
         RecipeIngredient,
         on_delete=models.CASCADE,
     )
@@ -95,6 +94,14 @@ class RecipeIngredients(models.Model):
         Recipe,
         on_delete=models.CASCADE,
     )
+    class Meta:
+        ordering = ['-id']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['recipe_ingredient', 'recipe'],
+                name='unique_recipe_ingredient'
+            )
+        ]
 
 
 class Favorite(models.Model):
