@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from recipes.models import (Ingredient, Tag, Recipe,
                             Favorite, RecipeIngredient, ShoppingCart)
 from users.models import User, Subscribe
-from .serializers import (IngredientSerializer, TagSerializer, RecipeSerializer)
+from .serializers import (IngredientSerializer, TagSerializer, RecipeSerializer, RecipeGetSerializer)
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
@@ -25,6 +25,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
     serializer_class = RecipeSerializer
     permission_classes=[IsAuthenticated, ]
     http_method_names = ['get', 'post', 'patch', 'delete']
+
+    def get_serializer_class(self):
+        if self.action in ('list', 'retrieve'):
+            return RecipeGetSerializer
+        return RecipeSerializer
 
     # def perform_create(self, serializer):
     #     serializer.save(author=self.request.user)

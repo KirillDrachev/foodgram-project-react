@@ -25,11 +25,17 @@ class UserSerializer(UserCreateSerializer):
         return (request.user.is_authenticated
                 and request.user.follower.filter(author=obj).exists())
     
-
+class TagListSerializer(serializers.ListSerializer):
+    index_field = 'pk'
 class TagSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField(required=False)
+    slug = serializers.SlugField(required=False)
+    color = serializers.CharField(required=False)
     class Meta:
         model = Tag
-        fields = '__all__'
+        fields = ('id', 'name', 'slug', 'color')
+        list_serializer_class = TagListSerializer
 
 class Base64ImageField(serializers.ImageField):
     def to_internal_value(self, data):
@@ -73,8 +79,9 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 
 class RecipeSerializer(serializers.ModelSerializer):
     image = Base64ImageField(required=True)
-    tags = TagSerializer(many=True, required=False)
-    ingredients = RecipeIngredientSerializer(many=True, )
+    # tags = TagSerializer(many=True, )
+    tags = serializers.PrimaryKeyRelatedField(many=True, required=True, read_only=False, queryset=Tag.objects.all(), )
+    ingredients = RecipeIngredientSerializer(many=True, read_only=False)
     author = UserSerializer(read_only=True)
 
     class Meta:
@@ -82,20 +89,26 @@ class RecipeSerializer(serializers.ModelSerializer):
         fields = ('id', 'tags', 'author', 'ingredients',
                   'name',
                   'image', 'text', 'cooking_time',)
+        depth = 1
 
+    def validate(self, data):
+        print(data.get('tags'))
+        # tag_id_list = []
+        # for tag_id in data.get('tags'):
+        #     print(tag_id)
+        #     tag_id_list.append({'id': tag_id})
+        # print(tag_id_list)
+        # data.get('tags').set(tag_id_list)
+        return data
+    
     def create(self, validated_data):
         request = self.context.get('request')
-        print(self.initial_data)
-        print(self.validated_data)
-        if 'ingredients' not in self.initial_data:
-            recipe = Recipe.objects.create(author=request.user, **validated_data)
-            return recipe
+        tags = validated_data.pop('tags')
         ingredients = validated_data.pop('ingredients')
-        print(ingredients)
         recipe = Recipe.objects.create(author=request.user, **validated_data)
+        recipe.tags.set(tags)
         for ingredient in ingredients:
-            print(ingredient)
-            print(ingredient.get('ingredient').get('id'))
+
             current_ingredient = get_object_or_404(
                 Ingredient, id=ingredient.get('ingredient').get('id')
             )
@@ -107,3 +120,39 @@ class RecipeSerializer(serializers.ModelSerializer):
                 recipe_ngredient=current_recipe_ingredient, recipe=recipe
             )
         return recipe
+    
+    def update(self,instance, validated_data):
+        request = self.context.get('request')
+        tags = validated_data.pop('tags')
+        ingredients = validated_data.pop('ingredients')
+        instance.tags.clear()
+        instance.tags.set(tags)
+        instance.ingredients.all().delete()
+        for ingredient in ingredients:
+            current_ingredient = get_object_or_404(
+                Ingredient, id=ingredient.get('ingredient').get('id')
+            )
+            amount = ingredient.get('amount')
+            current_recipe_ingredient = RecipeIngredient.objects.create(
+                ingredient=current_ingredient, amount=amount
+            )
+            RecipeIngredients.objects.create(
+                recipe_ngredient=current_recipe_ingredient, recipe=instance
+            )
+        instance.save()
+        return instance
+    
+
+class RecipeGetSerializer(serializers.ModelSerializer):
+    image = Base64ImageField()
+    tags = TagSerializer(many=True, read_only=True)
+    ingredients = RecipeIngredientSerializer(many=True, read_only=True)
+    author = UserSerializer(read_only=True)
+
+    class Meta:
+        model = Recipe
+        fields = ('id', 'tags', 'author', 'ingredients',
+                  'name',
+                  'image', 'text', 'cooking_time',)
+
+   
