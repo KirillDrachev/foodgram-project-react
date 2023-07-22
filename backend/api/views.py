@@ -59,7 +59,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             serializer = ShoppingCartSerializer(
                 data={'user': request.user.id, 'recipe': recipe.id, },
                 context={'request': request}
-                )
+            )
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -80,7 +80,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         for recipe in recipes:
             ingredients = RecipeIngredient.objects.filter(
                 recipeIngredientRecipe__recipe=recipe
-                )
+            )
             for ingredient in ingredients:
                 ingredients_list.append(
                     [
@@ -88,7 +88,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                         ingredient.amount,
                         ingredient.ingredient.measurement_unit
                     ]
-                    )
+                )
         shopping_cart = []
         for ingredient in ingredients_list:
             name = ingredient[0]
@@ -102,10 +102,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return response
 
     @action(
-            detail=True,
-            methods=['post', 'delete'],
-            permission_classes=[IsAuthenticated, ]
-            )
+        detail=True,
+        methods=['post', 'delete'],
+        permission_classes=[IsAuthenticated, ]
+    )
     def favorite(self, request, pk):
         recipe = get_object_or_404(Recipe, id=pk)
 
@@ -113,7 +113,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             serializer = FavoriteSerializer(
                 data={'user': request.user.id, 'recipe': recipe.id, },
                 context={'request': request}
-                )
+            )
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)

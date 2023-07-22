@@ -79,7 +79,7 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
         source='ingredient.name',
         read_only=True,
         required=False
-        )
+    )
 
     class Meta:
         model = RecipeIngredient

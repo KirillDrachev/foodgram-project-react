@@ -75,7 +75,7 @@ class Recipe(models.Model):
     ingredients = models.ManyToManyField(
         RecipeIngredient,
         through='RecipeIngredientRecipe'
-        )
+    )
     cooking_time = models.PositiveSmallIntegerField(
         validators=[
             MinValueValidator(1)
