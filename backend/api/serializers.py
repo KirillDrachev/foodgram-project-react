@@ -125,6 +125,12 @@ class RecipeSerializer(serializers.ModelSerializer):
         #     tag_id_list.append({'id': tag_id})
         # print(tag_id_list)
         # data.get('tags').set(tag_id_list)
+        ingredients = data.get('ingredients')
+        if len(ingredients) <=0:
+            raise serializers.ValidationError('Ingredients required!')
+        tags = data.get('tags')
+        if len(tags) <=0:
+            raise serializers.ValidationError('Tags required!')
         return data
 
     def create(self, validated_data):
@@ -133,20 +139,33 @@ class RecipeSerializer(serializers.ModelSerializer):
         ingredients = validated_data.pop('ingredients')
         recipe = Recipe.objects.create(author=request.user, **validated_data)
         recipe.tags.set(tags)
-        for ingredient in ingredients:
-            current_ingredient = get_object_or_404(
-                Ingredient, id=ingredient.get('ingredient').get('id')
-            )
-            amount = ingredient.get('amount')
-            current_recipe_ingredient = RecipeIngredient.objects.create(
-                ingredient=current_ingredient, amount=amount
-            )
-            RecipeIngredientRecipe.objects.create(
-                recipe_ingredient=current_recipe_ingredient, recipe=recipe
-            )
+        try:
+            for ingredient in ingredients:
+                current_ingredient = get_object_or_404(
+                    Ingredient, id=ingredient.get('ingredient').get('id')
+                )
+                amount = ingredient.get('amount')
+                current_recipe_ingredient = RecipeIngredient.objects.create(
+                    ingredient=current_ingredient, amount=amount
+                )
+                RecipeIngredientRecipe.objects.create(
+                    recipe_ingredient=current_recipe_ingredient, recipe=recipe
+                )
+        except:
+            recipe.delete()
+            raise serializers.ValidationError('Bad request!')
         return recipe
 
     def update(self, instance, validated_data):
+        name = validated_data.pop('name')
+        instance.name = name
+
+        image = validated_data.pop('image')
+        instance.image = image
+
+        text = validated_data.pop('text')
+        instance.text = text
+
         tags = validated_data.pop('tags')
         ingredients = validated_data.pop('ingredients')
         instance.tags.clear()
