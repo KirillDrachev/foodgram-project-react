@@ -13,6 +13,8 @@ class IngredientResource(resources.ModelResource):
 
     class Meta:
         model = Ingredient
+        import_id_fields = ('name',)
+        skip_unchanged = True
 
 
 class IngredientAdmin(ImportExportModelAdmin):
