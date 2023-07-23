@@ -126,10 +126,10 @@ class RecipeSerializer(serializers.ModelSerializer):
         # print(tag_id_list)
         # data.get('tags').set(tag_id_list)
         ingredients = data.get('ingredients')
-        if len(ingredients) <=0:
+        if len(ingredients) <= 0:
             raise serializers.ValidationError('Ingredients required!')
         tags = data.get('tags')
-        if len(tags) <=0:
+        if len(tags) <= 0:
             raise serializers.ValidationError('Tags required!')
         return data
 
@@ -151,7 +151,7 @@ class RecipeSerializer(serializers.ModelSerializer):
                 RecipeIngredientRecipe.objects.create(
                     recipe_ingredient=current_recipe_ingredient, recipe=recipe
                 )
-        except:
+        except ValueError:
             recipe.delete()
             raise serializers.ValidationError('Bad request!')
         return recipe

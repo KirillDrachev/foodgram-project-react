@@ -112,9 +112,9 @@ class RecipeIngredientRecipe(models.Model):
     )
 
     def __str__(self):
-        return (f'{self.recipe.name} <- ' +
-                f'{self.recipe_ingredient.ingredient.name}: ' +
-                f'{self.recipe_ingredient.amount}'
+        return (f'{self.recipe.name} <- '
+                + f'{self.recipe_ingredient.ingredient.name}: '
+                + f'{self.recipe_ingredient.amount}'
                 )
 
     class Meta:
