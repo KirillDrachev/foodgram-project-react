@@ -21,6 +21,9 @@ class Tag(models.Model):
         unique=True,
     )
 
+    def __str__(self):
+        return self.name
+
     class Meta:
         ordering = ['name']
 
@@ -35,6 +38,9 @@ class Ingredient(models.Model):
         'Unit',
         max_length=20,
     )
+
+    def __str__(self):
+        return f'{self.name} {self.measurement_unit}'
 
     class Meta:
         ordering = ['name']
@@ -51,6 +57,9 @@ class RecipeIngredient(models.Model):
             MinValueValidator(1)
         ],
     )
+
+    def __str__(self):
+        return (f'{self.ingredient.name}: {self.amount}')
 
 
 class Recipe(models.Model):
@@ -84,6 +93,9 @@ class Recipe(models.Model):
     created = models.DateTimeField(auto_now_add=True,
                                    verbose_name='Created')
 
+    def __str__(self):
+        return f'{self.name}'
+
     class Meta:
         ordering = ['-created']
 
@@ -99,6 +111,12 @@ class RecipeIngredientRecipe(models.Model):
         on_delete=models.CASCADE,
         related_name='ingredient'
     )
+
+    def __str__(self):
+        return (f'{self.recipe.name} <- ' +
+                f'{self.recipe_ingredient.ingredient.name}: ' +
+                f'{self.recipe_ingredient.amount}'
+                )
 
     class Meta:
         ordering = ['-id']
@@ -124,6 +142,9 @@ class Favorite(models.Model):
     created = models.DateTimeField(auto_now_add=True,
                                    verbose_name='Created')
 
+    def __str__(self):
+        return f'{self.user.username} -> {self.recipe.name}'
+
     class Meta:
         ordering = ['-created']
         constraints = [
@@ -147,6 +168,9 @@ class ShoppingCart(models.Model):
     )
     created = models.DateTimeField(auto_now_add=True,
                                    verbose_name='Created')
+
+    def __str__(self):
+        return f'{self.user.username} -> {self.recipe.name}'
 
     class Meta:
         ordering = ['-created']

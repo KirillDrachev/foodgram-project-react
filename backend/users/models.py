@@ -47,6 +47,9 @@ class Subscribe(models.Model):
         verbose_name='Subscribing'
     )
 
+    def __str__(self):
+        return f'{self.user.username} -> {self.author.username}'
+
     class Meta:
         constraints = [
             models.UniqueConstraint(
