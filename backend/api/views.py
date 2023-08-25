@@ -23,6 +23,7 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = (AllowAny,)
     pagination_class = None
     search_fields = ('^name',)
+    http_method_names = ['get', ]
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
@@ -31,17 +32,31 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = (AllowAny, )
     pagination_class = None
     search_fields = ('^name',)
+    http_method_names = ['get', ]
     filter_backends = (DjangoFilterBackend,)
     filterset_class = IngredientFilter
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
-    queryset = Recipe.objects.all()
+    # queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
     permission_classes = [IsAuthorOrReadOnly, ]
     http_method_names = ['get', 'post', 'patch', 'delete']
+
+    def get_queryset(self):
+        if (self.request.query_params.get('is_favorited') == '1'):
+            print("is_favorited")
+            return Recipe.objects.filter(infavorite__user=self.request.user)
+        elif (self.request.query_params.get('is_in_shopping_cart') == '1'):
+            return Recipe.objects.filter(carts__user=self.request.user)
+        elif (self.request.query_params.get('author')):
+            return Recipe.objects.filter(
+                author=self.request.query_params.get('author')
+                )
+        else:
+            return Recipe.objects.all()
 
     def get_serializer_class(self):
         if self.action in ('list', 'retrieve'):
@@ -124,12 +139,20 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class UserSubscriptionsViewSet(viewsets.ModelViewSet):
+class UserSubscriptionsGetViewSet(viewsets.ModelViewSet):
     serializer_class = UserSubscribeViewSerializer
     permission_classes = [IsAuthenticated, ]
 
     def get_queryset(self):
         return User.objects.filter(following__user=self.request.user)
+
+    
+
+
+class UserSubscriptionsViewSet(viewsets.ModelViewSet):
+    serializer_class = UserSubscribeSerializer
+    permission_classes = [IsAuthenticated, ]
+    queryset = Subscribe.objects.all()
 
     def post(self, request, user_id):
         author = get_object_or_404(User, id=user_id)
@@ -142,9 +165,7 @@ class UserSubscriptionsViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def delete(self, request, user_id):
-        author = get_object_or_404(User, id=user_id)
-        if not request.user.follower.filter(author=author).exists():
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-        Subscribe.objects.get(user=request.user.id,
-                              author=user_id).delete()
+        subscriotion = get_object_or_404(Subscribe, user=request.user.id,
+                              author=user_id)
+        subscriotion.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

@@ -18,7 +18,6 @@ class UserSerializer(UserCreateSerializer):
             'username', 'id', 'email', 'first_name', 'last_name', 'password',
             'is_subscribed',
         )
-        extra_kwargs = {'password': {'write_only': True}}
         model = User
 
     def get_is_subscribed(self, obj):
@@ -220,37 +219,53 @@ class FavoriteSerializer(serializers.ModelSerializer):
 
 
 class UserSubscribeSerializer(serializers.ModelSerializer):
+    # user = serializers.SerializerMethodField()
+    # author = serializers.SerializerMethodField()
 
     class Meta:
         model = Subscribe
         fields = '__all__'
 
+    # def get_user(self, obj):
+    #     request = self.context.get('request')
+    #     return (request.user.id)
 
-class UserSubscribeViewSerializer(UserSerializer):
+    # def get_author(self, obj):
+    #     author = get_object_or_404(User, id=user_id)
+    #     return (author.id)
+
+    def validate(self, data):
+        if data.get('user').id == data.get('author').id:
+            raise serializers.ValidationError('Подписка на самого себя')
+        return data
+
+
+class UserSubscribeViewSerializer(serializers.ModelSerializer):
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
-    is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = ('id', 'email', 'username',
                   'first_name', 'last_name',
-                  'is_subscribed', 'recipes',
+                  'recipes',
                   'recipes_count')
 
     def get_recipes(self, obj):
         request = self.context.get('request')
-        recipes_limit = None
-        if request:
-            recipes_limit = request.query_params.get('recipes_limit')
+        recipes_limit = request.query_params.get('recipes_limit')
         recipes = obj.recipes.all()
         if recipes_limit:
-            recipes = obj.recipes.all()[:int(recipes_limit)]
+            recipes = recipes[0:int(recipes_limit)]
+
         return RecipeSerializer(recipes, many=True,
                                 context={'request': request}).data
 
     def get_recipes_count(self, obj):
         return obj.recipes.count()
+
+    
+
 
 
 class ShoppingCartSerializer(serializers.ModelSerializer):

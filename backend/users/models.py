@@ -51,13 +51,5 @@ class Subscribe(models.Model):
         return f'{self.user.username} -> {self.author.username}'
 
     class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=['user', 'author'],
-                name='unique_subscribe'
-            ),
-            models.CheckConstraint(
-                check=~models.Q(author=models.F('user')),
-                name='forbidden_self_subscribe'
-            )
-        ]
+        ordering = ['user']
+
