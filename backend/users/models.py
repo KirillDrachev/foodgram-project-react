@@ -52,4 +52,3 @@ class Subscribe(models.Model):
 
     class Meta:
         ordering = ['user']
-

@@ -159,8 +159,9 @@ class RecipeSerializer(serializers.ModelSerializer):
         name = validated_data.pop('name')
         instance.name = name
 
-        image = validated_data.pop('image')
-        instance.image = image
+        if (validated_data.get('image')):
+            image = validated_data.pop('image')
+            instance.image = image
 
         text = validated_data.pop('text')
         instance.text = text
@@ -263,9 +264,6 @@ class UserSubscribeViewSerializer(serializers.ModelSerializer):
 
     def get_recipes_count(self, obj):
         return obj.recipes.count()
-
-    
-
 
 
 class ShoppingCartSerializer(serializers.ModelSerializer):
