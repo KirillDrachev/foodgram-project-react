@@ -35,8 +35,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         if (self.request.query_params.get('name')):
             return Ingredient.objects.filter(
-                name__startswith=self.request.query_params.get('name')
-                )
+                name__startswith=self.request.query_params.get('name'))
         return Ingredient.objects.all()
 
 
@@ -56,8 +55,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return Recipe.objects.filter(carts__user=self.request.user)
         elif (self.request.query_params.get('author')):
             return Recipe.objects.filter(
-                author=self.request.query_params.get('author')
-                )
+                author=self.request.query_params.get('author'))
         else:
             return Recipe.objects.all()
 
