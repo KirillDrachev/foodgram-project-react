@@ -1,13 +1,10 @@
 from django.contrib import admin
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
+
 from .models import (Favorite, Ingredient, Recipe, RecipeIngredient,
                      RecipeIngredientRecipe, ShoppingCart, Tag)
 
-
-# @admin.register(Ingredient)
-# class IngredientAdmin(admin.ModelAdmin):
-#     exclude = ('pk',)
 
 class IngredientResource(resources.ModelResource):
 
@@ -39,10 +36,17 @@ class TagAdmin(admin.ModelAdmin):
     exclude = ('pk',)
 
 
+class RecipeIngredientInLine(admin.TabularInline):
+    model = RecipeIngredientRecipe
+    extra = 0
+    min_num = 1
+
+
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     list_display = ('author', 'name')
     list_filter = ('author', 'tags')
+    inlines = (RecipeIngredientInLine, )
 
 
 @admin.register(Favorite)

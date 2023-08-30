@@ -51,4 +51,4 @@ class Subscribe(models.Model):
         return f'{self.user.username} -> {self.author.username}'
 
     class Meta:
-        ordering = ['user']
+        ordering = ['-author_id']

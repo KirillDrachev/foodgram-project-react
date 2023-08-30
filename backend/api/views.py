@@ -40,7 +40,6 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
-    # queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
@@ -49,15 +48,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         if (self.request.query_params.get('is_favorited') == '1'):
-            print("is_favorited")
             return Recipe.objects.filter(infavorite__user=self.request.user)
-        elif (self.request.query_params.get('is_in_shopping_cart') == '1'):
+        if (self.request.query_params.get('is_in_shopping_cart') == '1'):
             return Recipe.objects.filter(carts__user=self.request.user)
-        elif (self.request.query_params.get('author')):
+        if (self.request.query_params.get('author')):
             return Recipe.objects.filter(
                 author=self.request.query_params.get('author'))
-        else:
-            return Recipe.objects.all()
+        return Recipe.objects.all()
 
     def get_serializer_class(self):
         if self.action in ('list', 'retrieve'):
