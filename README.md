@@ -2,7 +2,7 @@
 
 http://158.160.62.106/recipes
 
-superuser
+## superuser
 
 username: kirill
 
